@@ -4,10 +4,10 @@
   "description": "CLI to run scripts in package.json",
   "main": "index.js",
   "scripts": {
-    "test": "echo 'test'",
-    "test:unit": "echo 'test:unit'",
-    "test:integration": "echo 'test:integration'",
-    "build": "echo 'build'"
+    "demo:test": "",
+    "demo:test:unit": "",
+    "demo:test:integration": "",
+    "demo:build": ""
   },
   "author": "m@smuco.de",
   "license": "ISC",

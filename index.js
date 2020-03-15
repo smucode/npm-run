@@ -3,6 +3,8 @@ const inquirer = require('inquirer')
 const { spawn } = require('child_process')
 const fs = require('fs')
 
+const configFilename = '.npmrunrc'
+
 const run = (command, env = process.env) => {
   const proc = spawn('npm', ['run', command], { env })
   proc.stdout.on('data', log)
@@ -33,12 +35,16 @@ const defaultConfig = {
 }
 
 const readConfig = () => {
+  if (!fs.existsSync(configFilename)) {
+    return defaultConfig
+  }
   try {
-    const cfg = fs.readFileSync('./.npmrunrc')
+    const cfg = fs.readFileSync(configFilename)
     const parsed = JSON.parse(cfg.toString())
     return { ...defaultConfig, ...parsed }
   } catch (e) {
     console.log('unable to read .npmrunrc: ' + e.message)
+    console.log('using default: ' + JSON.stringify(defaultConfig, 0, 2))
     return defaultConfig
   }
 }
@@ -92,7 +98,7 @@ const cli = async scripts => {
       name: 'command',
       pageSize: 10,
       choices: R.pipe(R.keys, x => x.sort())(scripts),
-      message: `Select which ${packageJson.name}@${packageJson.version} script to run:`
+      message: `${packageJson.name}@${packageJson.version}`
     }
   ])
   const current = scripts[answer.command]
