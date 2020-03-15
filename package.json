@@ -1,15 +1,15 @@
 {
   "name": "npm-run-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI to run scripts in package.json",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc index.ts --outDir dist",
     "build:watch": "tsc index.ts --outDir dist --watch",
-    "demo:test": "",
-    "demo:test:unit": "",
-    "demo:test:integration": "",
-    "demo:build": ""
+    "demo:option-with-children": "",
+    "demo:option-with-children:option-a": "",
+    "demo:option-with-children:option-b": "",
+    "demo:another-option": ""
   },
   "author": "m@smuco.de",
   "license": "ISC",
