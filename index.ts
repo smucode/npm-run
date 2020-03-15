@@ -1,24 +1,24 @@
-const R = require('ramda')
-const inquirer = require('inquirer')
-const { spawn } = require('child_process')
-const fs = require('fs')
+import * as R from 'ramda'
+import { prompt } from 'inquirer'
+import { spawn } from 'child_process'
+import { readFileSync, existsSync } from 'fs'
 
 const configFilename = '.npmrunrc'
 
-const run = (command, env = process.env) => {
+const run = (command: string, env = process.env) => {
   const proc = spawn('npm', ['run', command], { env })
-  proc.stdout.on('data', log)
-  proc.stderr.on('data', log)
+  proc.stdout.on('data', b => log(b.toString()))
+  proc.stderr.on('data', b => log(b.toString()))
 }
 
-const log = data => process.stdout.write(data.toString())
+const log = (data: string) => process.stdout.write(data)
 
-const exit = msg => {
+const exit = (msg: string) => {
   console.error(msg)
   process.exit(1)
 }
 
-const parsePackageJson = file => {
+const parsePackageJson = (file: string) => {
   try {
     const parsed = JSON.parse(file)
     if (!R.keys(parsed.scripts || {}).length) {
@@ -35,43 +35,47 @@ const defaultConfig = {
 }
 
 const readConfig = () => {
-  if (!fs.existsSync(configFilename)) {
+  if (!existsSync(configFilename)) {
     return defaultConfig
   }
   try {
-    const cfg = fs.readFileSync(configFilename)
+    const cfg = readFileSync(configFilename)
     const parsed = JSON.parse(cfg.toString())
     return { ...defaultConfig, ...parsed }
   } catch (e) {
     console.log('unable to read .npmrunrc: ' + e.message)
-    console.log('using default: ' + JSON.stringify(defaultConfig, 0, 2))
+    console.log('using default: ' + JSON.stringify(defaultConfig, null, 2))
     return defaultConfig
   }
 }
 
 const readPackageJson = () => {
   try {
-    return fs.readFileSync('./package.json')
+    return readFileSync('./package.json').toString()
   } catch (e) {
     exit(`package.json not found in ${process.cwd()}`)
   }
 }
 
-const updateScriptObj = (obj, tokens, command) => {
+const updateScriptObj = (
+  commands: Commands,
+  tokens: string[],
+  command: string
+) => {
   const [token, ...rest] = tokens
-  if (!token) return obj
+  if (!token) return commands
 
-  const current = obj[token] || { command: '', children: {} }
+  const current = commands[token] || { command: '', children: {} }
 
   if (rest.length) {
     const children = updateScriptObj(current.children, rest, command)
     return {
-      ...obj,
+      ...commands,
       [token]: { ...current, children }
     }
   } else {
     return {
-      ...obj,
+      ...commands,
       [token]: { ...current, command }
     }
   }
@@ -81,8 +85,8 @@ const config = readConfig()
 
 const packageJson = R.pipe(readPackageJson, parsePackageJson)()
 
-const scripts = R.pipe(
-  R.keys(),
+const commands = R.pipe(
+  R.keys,
   R.reduce((obj, command) => {
     const tokens = config.delimiter
       ? command.split(config.delimiter)
@@ -91,17 +95,26 @@ const scripts = R.pipe(
   }, {})
 )(packageJson.scripts)
 
-const cli = async scripts => {
-  const answer = await inquirer.prompt([
+interface Commands {
+  [index: string]: Command
+}
+
+interface Command {
+  command: string
+  children: Commands
+}
+
+const cli = async (commands: Commands) => {
+  const answer = await prompt([
     {
       type: 'list',
       name: 'command',
       pageSize: 10,
-      choices: R.pipe(R.keys, x => x.sort())(scripts),
+      choices: R.pipe(R.keys, x => x.sort())(commands),
       message: `${packageJson.name}@${packageJson.version}`
     }
   ])
-  const current = scripts[answer.command]
+  const current = commands[answer.command]
 
   if (R.isEmpty(current.children)) {
     run(current.command)
@@ -121,4 +134,4 @@ const cli = async scripts => {
   }
 }
 
-cli(scripts)
+cli(commands)

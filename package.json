@@ -2,8 +2,10 @@
   "name": "npm-run-cli",
   "version": "1.0.0",
   "description": "CLI to run scripts in package.json",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc index.ts --outDir dist",
+    "build:watch": "tsc index.ts --outDir dist --watch",
     "demo:test": "",
     "demo:test:unit": "",
     "demo:test:integration": "",
@@ -12,7 +14,10 @@
   "author": "m@smuco.de",
   "license": "ISC",
   "devDependencies": {
-    "prettier": "^1.19.1"
+    "@types/inquirer": "^6.5.0",
+    "@types/ramda": "^0.26.44",
+    "prettier": "^1.19.1",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "inquirer": "^7.0.6",
