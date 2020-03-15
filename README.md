@@ -19,7 +19,7 @@ Given the following scripts section in package.json:
 
 `npm-run` will output:
 
-![demo](demo.gif)
+![demo](https://raw.githubusercontent.com/smucode/npm-run-cli/master/demo.gif)
 
 ## Installation
 
