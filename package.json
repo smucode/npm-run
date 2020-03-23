@@ -15,7 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/inquirer": "^6.5.0",
-    "@types/ramda": "^0.26.44",
+    "@types/ramda": "^0.27.0",
     "prettier": "^1.19.1",
     "typescript": "^3.8.3"
   },
